@@ -1088,13 +1088,13 @@ require_once 'config/config.php';
 (function () {
     'use strict';
 
-    const input    = document.getElementById('matricInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const errBox   = document.getElementById('loginError');
-    const errText  = document.getElementById('loginErrorText');
-    const spinner  = document.getElementById('loginSpinner');
-    const btnIcon  = document.getElementById('loginBtnIcon');
-    const btnText  = document.getElementById('loginBtnText');
+    const input      = document.getElementById('matricInput');
+    const loginBtn   = document.getElementById('loginBtn');
+    const errBox     = document.getElementById('loginError');
+    const errText    = document.getElementById('loginErrorText');
+    const spinner    = document.getElementById('loginSpinner');
+    const btnIcon    = document.getElementById('loginBtnIcon');
+    const btnText    = document.getElementById('loginBtnText');
 
     // Input change handler (no auto-uppercase)
     input.addEventListener('input', function () {
@@ -1146,13 +1146,19 @@ require_once 'config/config.php';
         })
         .then(function (data) {
             if (data.success) {
-                // Brief success flash before redirect
-                btnText.textContent = 'Welcome, ' + data.name + '!';
-                btnIcon.className = 'bi bi-check2-circle';
-                loginBtn.style.background = '#1a7a3c';
-                setTimeout(function () {
-                    window.location.href = data.redirect;
-                }, 700);
+                // If this is the first login for this player, ask for gender
+                if (data.require_gender) {
+                    setLoading(false);
+                    showGenderChoice(data.redirect);
+                } else {
+                    // Brief success flash before redirect
+                    btnText.textContent = 'Welcome, ' + data.name + '!';
+                    btnIcon.className = 'bi bi-check2-circle';
+                    loginBtn.style.background = '#1a7a3c';
+                    setTimeout(function () {
+                        window.location.href = data.redirect;
+                    }, 700);
+                }
             } else {
                 setLoading(false);
                 showError(data.message || 'Matric number not recognised. Please check and try again.');
@@ -1184,6 +1190,64 @@ require_once 'config/config.php';
         errBox.style.display = 'none';
         input.style.borderColor = '';
         input.style.boxShadow = '';
+    }
+
+    function showGenderChoice(redirectUrl) {
+        // Replace modal body with a simple gender choice UI
+        const body = document.querySelector('.modal-body-custom');
+        if (!body) {
+            window.location.href = redirectUrl;
+            return;
+        }
+
+        body.innerHTML = `
+            <h3 style="font-family: 'Bebas Neue', sans-serif; letter-spacing: .12em; font-size: 1.2rem; margin-bottom: .75rem;">
+                SELECT YOUR GENDER
+            </h3>
+            <p style="font-size:.85rem;color:#555;margin-bottom:1rem;">
+                This is required once so we can apply the correct eligibility rules
+                (Football: male players only · Volleyball: all students).
+            </p>
+            <div class="d-flex gap-2 mb-2 flex-column">
+                <button type="button" class="btn btn-danger w-100" id="genderMaleBtn">
+                    <i class="bi bi-gender-male me-1"></i> I am Male
+                </button>
+                <button type="button" class="btn btn-outline-warning w-100" id="genderFemaleBtn">
+                    <i class="bi bi-gender-female me-1"></i> I am Female
+                </button>
+            </div>
+            <div id="genderError" style="display:none;background:#FFF5F5;border:1px solid rgba(163,29,36,0.3);border-left:4px solid #A31D24;border-radius:6px;padding:.6rem .75rem;font-size:.8rem;color:#7B181E;"></div>
+        `;
+
+        const genderErr = document.getElementById('genderError');
+
+        function saveGender(value) {
+            genderErr.style.display = 'none';
+            fetch('update_gender.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'gender=' + encodeURIComponent(value)
+            })
+            .then(function (res) {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.href = redirectUrl;
+                } else {
+                    genderErr.textContent = data.message || 'Could not save selection. Please try again.';
+                    genderErr.style.display = 'block';
+                }
+            })
+            .catch(function () {
+                genderErr.textContent = 'A connection error occurred. Please try again.';
+                genderErr.style.display = 'block';
+            });
+        }
+
+        document.getElementById('genderMaleBtn').onclick = function () { saveGender('male'); };
+        document.getElementById('genderFemaleBtn').onclick = function () { saveGender('female'); };
     }
 
 })();

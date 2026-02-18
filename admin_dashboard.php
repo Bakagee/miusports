@@ -272,7 +272,9 @@ function sportLabel(string $sport): string { return $sport === 'football' ? 'Foo
         <div class="container py-3 d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="brand-mark">
-                    <i class="bi bi-trophy-fill" style="color: var(--miu-gold); font-size: 1.35rem;"></i>
+                    <img src="miulogo.jpeg" alt="MIU"
+                         style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                         onerror="this.style.display='none';this.parentNode.innerHTML='<i class=\'bi bi-trophy-fill\' style=\'color: var(--miu-gold); font-size: 1.35rem;\'></i>'">
                 </div>
                 <div>
                     <div class="brand-title">ADMIN DASHBOARD</div>

@@ -18,6 +18,12 @@ if ($_SESSION['is_admin']) {
 $studentId   = (int)$_SESSION['student_id'];
 $studentName = $_SESSION['student_name'];
 
+// Determine gender (refresh from DB so it reflects latest change)
+$stmt = $pdo->prepare('SELECT gender FROM users WHERE id = :id LIMIT 1');
+$stmt->execute([':id' => $studentId]);
+$studentGender = $stmt->fetchColumn() ?: null;
+$_SESSION['gender'] = $studentGender;
+
 // ── Handle AJAX registration ──────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'register') {
     header('Content-Type: application/json');
@@ -39,8 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
             exit;
         }
 
-        // Gender gate removed: all users can register for all sports
-
         // Check player hasn't already registered for this sport
         $stmt = $pdo->prepare('SELECT id FROM registrations WHERE user_id = :uid AND sport = :sp LIMIT 1');
         $stmt->execute([':uid' => $studentId, ':sp' => $team['sport']]);
@@ -48,6 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
 
         if ($existing) {
             echo json_encode(['success' => false, 'message' => 'You are already registered for a ' . ucfirst($team['sport']) . ' team.']);
+            exit;
+        }
+
+        // Gender gate: females cannot register for football
+        if ($studentGender === 'female' && $team['sport'] === 'football') {
+            echo json_encode(['success' => false, 'message' => 'Female players register for Volleyball only.']);
             exit;
         }
 
@@ -1049,7 +1059,7 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
 <header class="topbar">
     <div class="topbar-left">
         <div class="topbar-logo">
-            <img src="miulogo.jpg" alt="MIU"
+            <img src="miulogo.jpeg" alt="MIU"
                  onerror="this.style.display='none';this.parentNode.innerHTML='<i class=\'bi bi-building logo-fallback\'></i>'">
         </div>
         <div>
@@ -1091,7 +1101,11 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
             Welcome, <span><?php echo htmlspecialchars(explode(' ', $studentName)[0]); ?></span>!
         </h1>
         <p class="welcome-sub">
-            Register for up to one Football team and one Volleyball team below. First come, first served.
+            <?php if ($studentGender === 'female'): ?>
+                You can register for <strong>one Volleyball team</strong>. Football is reserved for male players.
+            <?php else: ?>
+                Register for up to <strong>one Football team</strong> and <strong>one Volleyball team</strong> below. First come, first served.
+            <?php endif; ?>
         </p>
     </div>
 
@@ -1100,7 +1114,7 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
 
 
     <!-- ════════════════════════════════
-         FOOTBALL SECTION (males only)
+         FOOTBALL SECTION (male players only)
     ════════════════════════════════ -->
     <section class="sport-section" id="football-section">
 
@@ -1111,7 +1125,7 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
                 <div class="section-subtitle">8 teams · Max 12 players each · One team per player</div>
             </div>
             <span class="section-rule-badge" style="color:var(--miu-gold-dim);border-color:rgba(212,168,0,0.35);background:rgba(212,168,0,0.07);">
-                <i class="bi bi-people-fill me-1"></i>All Genders
+                <i class="bi bi-gender-male me-1"></i>Male players only
             </span>
         </div>
 
@@ -1175,7 +1189,11 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
                         </span>
                     </div>
 
-                    <?php if ($isMyTeam): ?>
+                    <?php if ($studentGender === 'female'): ?>
+                        <button class="btn-team-register btn-register-sport-taken" disabled>
+                            <i class="bi bi-lock-fill"></i> Volleyball only
+                        </button>
+                    <?php elseif ($isMyTeam): ?>
                         <button class="btn-team-register btn-register-done" disabled>
                             <i class="bi bi-patch-check-fill"></i> Your Team
                         </button>

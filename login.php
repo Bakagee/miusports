@@ -19,7 +19,7 @@ if ($matric === '') {
 }
 
 try {
-    $stmt = $pdo->prepare('SELECT id, name, role FROM users WHERE matric_number = :m LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, name, gender, role FROM users WHERE matric_number = :m LIMIT 1');
     $stmt->execute([':m' => $matric]);
     $row = $stmt->fetch();
 
@@ -27,15 +27,17 @@ try {
         // Store session
         $_SESSION['student_id']   = (int)$row['id'];
         $_SESSION['student_name'] = $row['name'];
-        // Gender removed from schema and session
+        $_SESSION['gender']       = $row['gender']; // may be null on first login
         $_SESSION['is_admin']     = ($row['role'] === 'director') ? 1 : 0;
 
         $redirect = $_SESSION['is_admin'] ? 'admin_dashboard.php' : 'dashboard.php';
+        $requireGender = ($row['role'] === 'player' && ($row['gender'] === null || $row['gender'] === ''));
 
         echo json_encode([
-            'success'  => true,
-            'redirect' => $redirect,
-            'name'     => $row['name'],
+            'success'        => true,
+            'redirect'       => $redirect,
+            'name'           => $row['name'],
+            'require_gender' => $requireGender,
         ]);
     } else {
         echo json_encode([
