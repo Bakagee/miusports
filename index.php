@@ -1,6 +1,12 @@
 <?php
-require_once 'config/config.php';
+
+    require_once 'config/config.php';   
+    require_once 'includes/db.php';
+
+    include 'players_count.php'; 
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -892,7 +898,9 @@ require_once 'config/config.php';
                 <span class="stat-label">Volleyball Teams</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num">12</span>
+                <span class="stat-num">
+                    <?php echo $max_football; ?>
+                </span>
                 <span class="stat-label">Max per Football</span>
             </div>
             <div class="stat-item">

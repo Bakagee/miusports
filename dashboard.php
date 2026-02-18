@@ -45,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
             exit;
         }
 
+        $max_number = (int)$team['max_players'];
+        var_dump($max_number); exit;
+
         // Check player hasn't already registered for this sport
         $stmt = $pdo->prepare('SELECT id FROM registrations WHERE user_id = :uid AND sport = :sp LIMIT 1');
         $stmt->execute([':uid' => $studentId, ':sp' => $team['sport']]);
@@ -1052,6 +1055,7 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
     </style>
 </head>
 <body>
+    
 
 <!-- ══════════════════════════════════════════════════════════
      TOPBAR
@@ -1122,7 +1126,14 @@ $hasVolleyball = isset($myRegistrations['volleyball']);
             <div class="section-sport-icon icon-football">⚽</div>
             <div>
                 <div class="section-title">FOOTBALL TEAMS</div>
-                <div class="section-subtitle">8 teams · Max 12 players each · One team per player</div>
+                <div class="section-subtitle">
+                    
+                <?php include 'players_count.php'; ?>
+                
+                8 teams · 
+                    Max 
+                    <?php echo $max_football; ?> 
+                    players each · One team per player</div>
             </div>
             <span class="section-rule-badge" style="color:var(--miu-gold-dim);border-color:rgba(212,168,0,0.35);background:rgba(212,168,0,0.07);">
                 <i class="bi bi-gender-male me-1"></i>Male players only
