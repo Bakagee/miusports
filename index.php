@@ -950,7 +950,7 @@ require_once 'config/config.php';
             <div class="col-md-6">
                 <a class="sport-card d-block" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
                     <div class="sport-card-bg"
-                         style="background-image:url('https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&auto=format&fit=crop&q=75')">
+                         style="background-image:url('miuvolley.jpeg')">
                     </div>
                     <div class="sport-card-overlay"></div>
                     <div class="sport-card-body">
