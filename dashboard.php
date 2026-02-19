@@ -45,9 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
             exit;
         }
 
-        $max_number = (int)$team['max_players'];
-        var_dump($max_number); exit;
-
         // Check player hasn't already registered for this sport
         $stmt = $pdo->prepare('SELECT id FROM registrations WHERE user_id = :uid AND sport = :sp LIMIT 1');
         $stmt->execute([':uid' => $studentId, ':sp' => $team['sport']]);
