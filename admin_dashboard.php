@@ -6,7 +6,7 @@ require_once 'includes/db.php';
 // Simple auth guard
 if (!isset($_SESSION['student_id'])) {
     header('Location: index.php');
-    exit;
+    exit;  
 }
 
 // Only directors can access admin dashboard
@@ -265,6 +265,9 @@ function sportLabel(string $sport): string { return $sport === 'football' ? 'Foo
                 align-items: flex-start;
             }
         }
+
+
+        
     </style>
 </head>
 <body>
