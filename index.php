@@ -70,7 +70,9 @@
     .hero-bg {
         position: absolute;
         inset: 0;
-        background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1800&auto=format&fit=crop&q=80');
+        /*  */
+        /* background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1800&auto=format&fit=crop&q=80'); */
+        background-image: url('miu_sport.jpeg');
         background-size: cover;
         background-position: center 30%;
         transform: scale(1.04);
